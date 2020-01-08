@@ -1,2 +1,2 @@
-# Programming - Prog2
-Raccolta di esercizi di Programmazione 2.
+# Programming - Algoritmi
+Raccolta di esercizi di Algoritmi.
