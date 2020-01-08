@@ -1,0 +1,129 @@
+#include <iostream>
+#include <fstream>
+
+using namespace std;
+
+inline int parent(int i){
+	return i >> 1;
+}
+
+inline int left(int i){
+	return i << 1;
+}
+
+inline int right(int i){
+	return (i << 1) | 1; 
+}
+
+template <class T> class MaxHeap{
+
+	private:
+		T *array;
+		int heapsize;
+		int dim;
+		
+		void swap(int i, int j){
+			T tmp = array[i];
+			array[i] = array[j];
+			array[j] = tmp;
+		}
+		
+		void maxHeapify(int i, int end){
+			int l = left(i);
+			int r = right(i);
+			int max = i;
+			if (l < end && array[l] > array[i]){
+				max = l;
+			}
+			if (r < end && array[r] > array[max]){
+				max = r;
+			}
+			if (max != i){
+				swap(i, max);
+				maxHeapify(max, end);
+			}
+		}
+		
+		
+	public:
+		MaxHeap(int dim = 200){
+			this->dim = dim+1;
+			array = new T[dim+1];
+			heapsize = 1;
+		}
+		
+		void insert(T key){
+			array[heapsize] = key;
+			heapsize++;
+		}
+		
+		void buildMaxHeap(){
+			for (int i = heapsize/2; i > 0; i--){
+				if (heapsize-1 > 0) maxHeapify(i, heapsize);
+			}			
+		}
+		
+		void stampa(ostream &os){
+			for (int i = 1; i < heapsize; i++){
+				os << array[i] << " ";	
+			}
+		}
+};
+
+
+int main(){
+	
+	fstream infile, outfile;
+	infile.open("input.txt", ios::in);
+	outfile.open("output.txt", ios::out);
+	
+	for (int task = 0; task < 100; task++){
+		
+		string type;
+		int N;
+		infile >> type >> N;
+		if (type == "int"){
+			MaxHeap <int> maxheap;
+			for (int i = 0; i < N; i++){
+				int x;
+				infile >> x;
+				maxheap.insert(x);
+			}
+			maxheap.buildMaxHeap();
+			maxheap.stampa(outfile);
+		}
+		if (type == "double"){
+			MaxHeap <double> maxheap;
+			for (int i = 0; i < N; i++){
+				double x;
+				infile >> x;
+				maxheap.insert(x);
+			}
+			maxheap.buildMaxHeap();
+			maxheap.stampa(outfile);
+		}
+		if (type == "char"){
+			MaxHeap <char> maxheap;
+			for (int i = 0; i < N; i++){
+				char x;
+				infile >> x;
+				maxheap.insert(x);
+			}
+			maxheap.buildMaxHeap();
+			maxheap.stampa(outfile);
+		}
+		if (type == "bool"){
+			MaxHeap <bool> maxheap;
+			for (int i = 0; i < N; i++){
+				bool x;
+				infile >> x;
+				maxheap.insert(x);
+			}
+			maxheap.buildMaxHeap();
+			maxheap.stampa(outfile);
+		}
+		outfile << endl;
+	}
+	
+return 0;	
+}
