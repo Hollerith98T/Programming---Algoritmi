@@ -1,0 +1,108 @@
+#include <iostream>
+#include <fstream>
+
+using namespace std;
+
+inline int parent(int i){
+	return i >> 1;
+}
+
+inline int left(int i){
+	return i << 1;
+}
+
+inline int right(int i){
+	return (i << 1)|1;
+}
+
+template <class T> class Heap{
+	private:
+		T *array;
+		int dim;
+		int heapsize;
+		
+		void swap(int i, int j){
+			T tmp = array[i];
+			array[i]=array[j];
+			array[j]=tmp;
+		}
+		
+		void minHeapify(int i, int end){
+			int l = left(i);
+			int r = right(i);
+			int max = i;
+			if (l < end && array[l] < array[i]){
+				max = l;
+			}
+			if (r < end && array[r] < array[max]){
+				max = r;
+			}
+			if (i != max){
+				swap(i, max);
+				minHeapify(max, end);
+			}
+		}
+		
+	public:
+		Heap(int dim=200){
+			this->dim=dim+1;
+			heapsize = 1;
+			array = new T[dim+1];
+		}
+		
+		void insert(T key){
+			array[heapsize++] = key;
+		}
+		
+		void buildMinHeap(){
+			for(int i=heapsize/2; i>0; i--){
+				if(heapsize-1 > 0){
+					minHeapify(i, heapsize);
+				}
+			}
+		}
+		
+		void stampa(ostream &os){
+			for (int i=1; i<heapsize; i++){
+				os << array[i] << " ";
+			}
+		}
+};
+
+
+
+
+int main(){
+	
+	fstream infile, outfile;
+	infile.open("input.txt", ios::in);
+	outfile.open("output.txt", ios::out);
+	
+	for(int i=0; i<100; i++){
+		string type;
+		int N;
+		infile >> type >> N;
+		if(type == "double" || type=="int" || type=="bool"){
+			Heap <double> heap;
+			for (int j=0; j<N; j++){
+				double ele;
+				infile >> ele;
+				heap.insert(ele);
+			}
+			heap.buildMinHeap();
+			heap.stampa(outfile);
+		}
+		if(type == "char"){
+			Heap <char> heap;
+			for (int j=0; j<N; j++){
+				char ele;
+				infile >> ele;
+				heap.insert(ele);
+			}
+			heap.buildMinHeap();
+			heap.stampa(outfile);
+		}
+		outfile << endl;
+	}
+	return 0;
+}
