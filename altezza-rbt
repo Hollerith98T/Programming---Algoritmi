@@ -1,0 +1,316 @@
+#include <iostream>
+#include <fstream>
+
+#define BLACK 0
+#define RED 1
+using namespace std;
+
+template <class T> class Node{
+
+	private:
+		T key;
+		int color;
+		Node <T> *left, *right, *parent;
+	public:
+		Node(T key){
+			this->key = key;
+			left = right = parent = NULL;
+		}
+		
+		void setKey(T key){
+			this->key = key;
+		}
+		
+		void setLeft(Node <T> *left){
+			this->left = left;
+		}
+		
+		void setRight(Node <T> *right){
+			this->right = right;
+		}
+		
+		void setParent(Node <T> *parent){
+			this->parent = parent;
+		}
+		
+		void setColor(int color){
+			this->color = color;
+		}
+		
+		T getKey(){
+			return key;
+		}
+		
+		Node <T> *getLeft(){
+			return left;
+		}
+		
+		Node <T> *getRight(){
+			return right;
+		}
+		
+		Node <T> *getParent(){
+			return parent;
+		}
+		
+		int getColor(){
+			return color;
+		}
+
+};
+
+template <class T> class RBT{
+
+	private:
+		Node <T> *root;
+		int N;
+		
+		int massimo(int a, int b){
+			if (a > b){
+				return a;
+			}
+			return b;
+		}
+		
+		int _getAltezza(Node <T> *y){
+			if (!y) return 0;
+			int lmax = _getAltezza(y->getLeft());
+			int rmax = _getAltezza(y->getRight());
+			return massimo(lmax, rmax)+1;
+		}
+		
+		void _preorder(Node <T> *y, ostream &os){
+			if (y){
+				if (y->getColor() == BLACK){
+					os << "(" << y->getKey() << " " << "B" << ")" << " ";
+				}
+				else{
+					os << "(" << y->getKey() << " " << "R" << ")" << " ";
+				}
+				_preorder(y->getLeft(), os);
+				_preorder(y->getRight(), os);
+			}
+		}
+		
+		void _inorder(Node <T> *y, ostream &os){
+			if (y){
+				_inorder(y->getLeft(), os);
+				if (y->getColor() == BLACK){
+					os << "(" << y->getKey() << " " << "B" << ")" << " ";
+				}
+				else{
+					os << "(" << y->getKey() << " " << "R" << ")" << " ";
+				}
+				_inorder(y->getRight(), os);
+			}
+		}
+		
+		void _postorder(Node <T> *y, ostream &os){
+			if (y){
+				_postorder(y->getLeft(), os);
+				_postorder(y->getRight(), os);
+				if (y->getColor() == BLACK){
+					os << "(" << y->getKey() << " " << "B" << ")" << " ";
+				}
+				else{
+					os << "(" << y->getKey() << " " << "R" << ")" << " ";
+				}
+			}
+		}
+		
+	public:
+		RBT(){
+			root = NULL;
+			N = 0;
+		}
+		
+		bool isLeftChild(Node <T> *y){
+			return y == y->getParent()->getLeft(); 
+		}
+		
+		Node <T> *grandparent(Node <T> *y){
+			return y->getParent()->getParent();
+		}
+		
+		Node <T> *uncle(Node <T> *y){
+			if (y->getParent() == grandparent(y)->getLeft()){
+				return grandparent(y)->getRight();
+			}
+			else{
+				return grandparent(y)->getLeft();
+			}
+		}
+		
+		void insertNodeUp(Node <T> *before, Node <T> *y){
+			if (before->getParent()){
+				if (isLeftChild(before)){
+					before->getParent()->setLeft(y);
+				}
+				else{
+					before->getParent()->setRight(y);
+				}
+			}
+			else{
+				root = y;
+			}
+			y->setParent(before->getParent());
+			before->setParent(y);
+		}
+		
+		void leftRotate(Node <T> *y){
+			Node <T> *newParent = y->getRight();
+			insertNodeUp(y, newParent);
+			y->setRight(newParent->getLeft());
+			if (newParent->getLeft()){
+				newParent->getLeft()->setParent(y);
+			}
+			newParent->setLeft(y);	
+		}
+		
+		void rightRotate(Node <T> *y){
+			Node <T> *newParent = y->getLeft();
+			insertNodeUp(y, newParent);
+			y->setLeft(newParent->getRight());
+			if (newParent->getRight()){
+				newParent->getRight()->setParent(y);
+			}
+			newParent->setRight(y);	
+		}
+		
+		void insert(T key){
+			Node <T> *newnode = new Node <T>(key);
+			Node <T> *tmp = root;
+			Node <T> *p = NULL;
+			while(tmp){
+				p = tmp;
+				if (key <= tmp->getKey()){
+					tmp = tmp->getLeft();
+				}
+				else{
+					tmp = tmp->getRight();
+				}
+			}
+			if (p){
+				if (key <= p->getKey()){
+					p->setLeft(newnode);
+				}
+				else{
+					p->setRight(newnode);
+				}
+			}
+			else{
+				root = newnode;
+			}
+			newnode->setParent(p);
+			newnode->setColor(RED);
+			N++;
+			insert1(newnode);
+		}
+		
+		void insert1(Node <T> *y){			
+			if (y->getParent() == NULL){
+				y->setColor(BLACK);
+			}
+			else{
+				insert2(y);
+			}		
+		}
+		
+		void insert2(Node <T> *y){
+			if (y->getParent()->getColor() == BLACK){ 
+				return;
+			}
+			else{
+				insert3(y);
+			} 
+		}
+		
+		void insert3(Node <T> *y){
+			if (uncle(y) != NULL && uncle(y)->getColor() == RED){
+				y->getParent()->setColor(BLACK);
+				uncle(y)->setColor(BLACK);
+				grandparent(y)->setColor(RED);
+				insert1(grandparent(y));
+			}
+			else{
+				insert4(y);
+			}
+		}
+		
+		void insert4(Node <T> *y){
+			if (y == y->getParent()->getRight() && y->getParent() == grandparent(y)->getLeft()){
+				leftRotate(y->getParent());
+				y = y->getLeft();
+			}
+			else if (y == y->getParent()->getLeft() && y->getParent() == grandparent(y)->getRight()){
+				rightRotate(y->getParent());
+				y = y->getRight();
+			}
+			insert5(y);
+		}	
+		
+		void insert5(Node <T> *y){
+			y->getParent()->setColor(BLACK);
+			grandparent(y)->setColor(RED);
+			if (y == y->getParent()->getLeft() && y->getParent() == grandparent(y)->getLeft()){
+				rightRotate(grandparent(y));
+			}
+			else{
+				if (y == y->getParent()->getRight() && y->getParent() == grandparent(y)->getRight()){
+				leftRotate(grandparent(y));
+				}		
+			}
+		}
+		
+		void preorder(ostream &os){
+			_preorder(root, os);
+		}
+		
+		void inorder(ostream &os){
+			_inorder(root, os);
+		}
+		
+		void postorder(ostream &os){
+			_postorder(root, os);
+		}
+		
+		int getAltezza(){
+			return _getAltezza(root);
+		}
+		
+};
+
+int main(){
+	
+	fstream infile, outfile;
+	infile.open("input.txt", ios::in);
+	outfile.open("output.txt", ios::out);
+	
+	for (int task = 0; task < 100; task++){
+		
+		string type;
+		int N;
+		infile >> type >> N;
+		if (type == "int"){
+			RBT <int> rbt;
+			for (int i = 0; i < N; i++){
+				int x;
+				infile >> x;
+				rbt.insert(x);
+			}
+			outfile << rbt.getAltezza();			
+		}
+		if (type == "double"){
+			RBT <double> rbt;
+			for (int i = 0; i < N; i++){
+				double x;
+				infile >> x;
+				rbt.insert(x);
+			}
+			outfile << rbt.getAltezza();
+		}
+		outfile << endl;
+	}
+	
+return 0;	
+}
