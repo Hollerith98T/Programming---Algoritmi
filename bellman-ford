@@ -1,0 +1,167 @@
+#include <iostream>
+#include <fstream>
+
+using namespace std;
+
+class Edge{
+	
+	private:
+		int src, dst;
+		int peso;
+	public:
+		Edge(int src, int dst, int peso){
+			this->src = src;
+			this->dst = dst;
+			this->peso = peso;
+		}
+		
+		int getSrc(){
+			return src;
+		}
+		
+		int getDst(){
+			return dst;
+		}	
+		
+		int getPeso(){
+			return peso;
+		}
+	
+};
+
+template <class T> class Graph{
+
+	private:
+		T *array;
+		Edge **matrice;
+		int len;
+		int n, e;
+		
+		int findIndex(T x){
+			for (int i = 0; i < n; i++){
+				if (array[i] == x){
+					return i;
+				}
+			}
+			return -1;
+		}
+		
+	public:
+		Graph(int len = 1000){
+			this->len = len;
+			n = e = 0;
+			array = new T[len];
+			matrice = new Edge*[len];
+			for (int i = 0; i < len; i++){
+				matrice[i] = NULL;
+			}
+		}
+		
+		void addNode(T x){
+			array[n] = x;
+			n++;
+		}	
+
+		void addEdge(T x, T y, int w){
+			int i = findIndex(x);
+			int j = findIndex(y);
+			matrice[e] = new Edge(i, j, w);
+			e++;
+		}
+		
+		void bellmanFord(T s, T d, ostream &os){
+			int dist[n];
+			int source = findIndex(s);
+			int destination = findIndex(d);
+			for (int i = 0; i < n; i++){
+				dist[i] = INT_MAX;
+				dist[source] = 0;
+			}
+			
+			for (int i = 1; i < n; i++){
+				for (int j = 0; j < e; j++){
+					if (matrice[j] != NULL){				
+					int u = matrice[j]->getSrc();
+					int v = matrice[j]->getDst();
+					int w = matrice[j]->getPeso();
+					if (dist[u] != INT_MAX && dist[u] + w < dist[v]){
+						dist[v] = dist[u] + w;
+					}
+				}
+			}
+		}
+			
+			for (int i = 0; i < e; i++){
+				if (matrice[i] != NULL){
+				
+				int u = matrice[i]->getSrc();
+				int v = matrice[i]->getDst();
+				int w = matrice[i]->getPeso();
+				if (dist[u] != INT_MAX && dist[u] + w < dist[v]){
+					os << "undef.";
+					return;
+				}
+			}
+		}
+			if (dist[destination] == INT_MAX){
+				os << "inf.";
+			}
+			else{
+				os << dist[destination];
+			}
+		}
+		
+		
+};
+
+int main(){
+	
+	fstream infile, outfile;
+	infile.open("input.txt", ios::in);
+	outfile.open("output.txt", ios::out);
+	
+	for (int task = 0; task < 100; task++){
+		
+		int n, e;
+		string type;
+		infile >> n >> e >> type;
+		if (type == "int"){
+			Graph <int> grafo;
+			for (int i = 0; i < n; i++){
+				int x;
+				infile >> x;
+				grafo.addNode(x);
+			}
+			for (int i = 0; i < e; i++){
+				char c;
+				int x, y, z;
+				infile >> c >> x >> y >> z >> c;
+				grafo.addEdge(x, y, z);
+			}
+			int s, d;
+			infile >> s >> d;
+			grafo.bellmanFord(s, d, outfile);
+		}
+		if (type == "double"){
+			Graph <double> grafo;
+			for (int i = 0; i < n; i++){
+				double x;
+				infile >> x;
+				grafo.addNode(x);
+			}
+			for (int i = 0; i < e; i++){
+				char c;
+				double x, y;
+				int z;
+				infile >> c >> x >> y >> z >> c;
+				grafo.addEdge(x, y, z);
+			}
+			double s, d;
+			infile >> s >> d;
+			grafo.bellmanFord(s, d, outfile);
+		}
+		outfile << endl;
+	}
+	
+return 0;	
+}
